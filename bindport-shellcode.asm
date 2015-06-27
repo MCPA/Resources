@@ -17,9 +17,7 @@ my $shellcode =
 %endcomment
 
 BITS 32
-
 SECTION .text 	; Section containing code
-
 global _start 			 ; Entry Point
 ; int socketcall(int call, unsigned long *args);
 ; System call number 102 (0x66)
