@@ -1,7 +1,7 @@
 ; Leander Metcalf
 ; 23 November 2014
 ;
-; nasm -f bin assn4-part1.asm
+; nasm -f bin reverse-shell.asm
 ; 71 Bytes with zero nulls or carriage returns
 ;
 ; After building the binary, harvest the hex code to place
