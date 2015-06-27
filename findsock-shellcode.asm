@@ -3,9 +3,6 @@
 ;
 ; nasm -f bin findsock-shellcode.asm
 ; 83 Bytes with no 0x00 or 0x0a bytes
-;
-; After building the binary, harvest the hex code to place
-; into the delivery mechanism.
 
 %comment
 $port="\x05\x39";	#port 0x0539 = 1337 in decimal
