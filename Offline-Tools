@@ -1,0 +1,23 @@
+Useful Tools Kits:
+- Metasploit (www.metasploit.com)
+- SIFT (digital-forensics.sans.org/community/downloads)
+- Security Onion (https://github.com/Security-Onion-Solutions/security-onion/wiki/Installation)
+- Basic Fuzzing Framework (https://www.cert.org/vulnerability-analysis/tools/bff.cfm?)
+- Failure Observation Engine (https://www.cert.org/vulnerability-analysis/tools/foe.cfm)
+
+Individual Tools:
+ROPgadget
+uncompyle2
+flawfinder
+ltrace
+strace
+valgrind
+A few large password lists
+    http://downloads.skullsecurity.org/passwords/rockyou.txt.bz2
+    https://mega.co.nz/#!VIwSmYhL!Q_u0io3nSxIeVnquONJcfb7D7aO0_fpi9SxSchR1mTM
+    http://www.filedropper.com/crackstation-human-onlytxt
+    https://www.dropbox.com/s/ucreldsa3qt1rms/crackstation-human-only.txt.gz?dl=0 
+scalpel (pre-installed on kali)
+autopsy (pre-installed on kali)
+guymager (pre-installed on kali)
+wireshark (pre-installed on kali)
