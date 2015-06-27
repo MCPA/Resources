@@ -1,6 +1,6 @@
 /* Leander Metcalf
     2 Oct 2014
-    Shellcode input must be in binary format ...
+    Shellcode testing harness input must be in binary format ...
     
     gcc harness.c -o harness -fno-stack-protector
     ./harness <shellcode>
@@ -35,4 +35,4 @@ int main (int argc, char **argv)
     foo();
 }
     return 0;
-} 
+}
