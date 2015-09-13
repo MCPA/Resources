@@ -1,6 +1,8 @@
-import sys,string,socket,pexpect,time,logging
+import sys,string,socket,time,logging,argparse
 
 symbols = 'abcdefghijklmnopqrstuvwxyz'
+port = 12345
+host = '192.168.239.128'
 
 def rot(*symbols):
     def _rot(n):
@@ -17,11 +19,8 @@ def encrypt(k,plaintext):
     logging.info('Your encrypted message is: ' + str(cipher))
 
 def decrypt(k,cipher):
-    plaintext = ''
     caesar_decode = rot(symbols)(26-k)
-    plaintext = caesar_decode(cipher)
-
-    logging.info('Key: '+str(k)+'Message: ' + plaintext)
+    return caesar_decode(cipher)
 
 def read(s):
     s.setblocking(0)
@@ -46,12 +45,29 @@ def read(s):
             pass
     return ''.join(data)  
 
-def main(argv):
-    logging.basicConfig(filename='caesar.log', level=logging.INFO)
-    port = 12345
-    host = '192.168.239.128'
-    if (len(sys.argv) != 3):
-        sys.exit('Usage: caesar.py <k> <mode>')
+def main():
+    try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+                '-H', '--host',type=str, help='IP Address', required = True)
+        parser.add_argument(
+                '-p', '--port',type=int, help='TCP Port', required = True)
+        sp = parser.add_subparsers(dest='subparser_name')
+
+        # create the parser for the "d" command
+        parser_d = sp.add_parser('d', help = 'd help')
+        parser_d.add_argument('decrypt', help='Decrypt', action='store_true')
+        parser_d.set_defaults(func=decrypt)
+
+        # create the parser for the "e" command
+        parser_e = sp.add_parser('e', help = 'e help')
+        parser_e.add_argument('encrypt', help='Encrypt', action='store_true')
+        parser_d.set_defaults(func=encrypt)
+
+        args = parser.parse_args()
+    except argparse.ArgumentError as err:
+        print str(err)
+        sys.exit(2)
 
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -62,19 +78,17 @@ def main(argv):
         logging.info('Error trying to connect.')
         sys.exit()
 
-    cipher = read(sock)[198:]
-    logging.info('Cipher = ' + cipher)
+    response = read(sock)
+    cipher = response[198:237]
+    print(response)
 
-    if sys.argv[2] == 'e':
-        encrypt(int(sys.argv[1]))
-    elif sys.argv[2] == 'd':
-        plaintext = raw_input('Enter plain text message: ')
-        decrypt(int(sys.argv[1]),plaintext)
-    elif sys.argv[2] == 'da':
-        for i in range(1,26):
-            decrypt(int(i),cipher)
-    else:
-        sys.exit('Error in mode type')
+    plaintext = ''
+    for i in range(1,26):
+        plaintext = decrypt(int(i),cipher)
+        if ("the" in plaintext):
+            print plaintext
+            sock.sendall(plaintext)
+            print read(sock)
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
