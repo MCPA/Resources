@@ -1,8 +1,6 @@
 import sys,string,socket,time,logging,argparse
 
 symbols = 'abcdefghijklmnopqrstuvwxyz'
-port = 12345
-host = '192.168.239.128'
 
 def rot(*symbols):
     def _rot(n):
@@ -12,15 +10,10 @@ def rot(*symbols):
     return _rot
 
 def encrypt(k,plaintext):
-    cipher = ''
-    caesar_encode = rot(symbols)(k)
-    cipher = caesar_encode(plaintext)
-
-    logging.info('Your encrypted message is: ' + str(cipher))
+    return rot(symbols)(k)(plaintext)
 
 def decrypt(k,cipher):
-    caesar_decode = rot(symbols)(26-k)
-    return caesar_decode(cipher)
+    return rot(symbols)(26-k)(cipher)
 
 def read(s):
     s.setblocking(0)
@@ -62,7 +55,7 @@ def main():
         # create the parser for the "e" command
         parser_e = sp.add_parser('e', help = 'e help')
         parser_e.add_argument('encrypt', help='Encrypt', action='store_true')
-        parser_d.set_defaults(func=encrypt)
+        parser_e.set_defaults(func=encrypt)
 
         args = parser.parse_args()
     except argparse.ArgumentError as err:
@@ -71,15 +64,15 @@ def main():
 
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ip = socket.gethostbyname(host)
-        sock.connect((ip, int(port)))
+        ip = socket.gethostbyname(args.host)
+        sock.connect((ip, int(args.port)))
         
     except socket.error, msg:
         logging.info('Error trying to connect.')
         sys.exit()
 
     response = read(sock)
-    cipher = response[198:237]
+    cipher = response[198:].rstrip()
     print(response)
 
     plaintext = ''
