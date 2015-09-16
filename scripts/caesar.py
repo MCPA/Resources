@@ -1,6 +1,7 @@
-import sys,string,socket,time,logging,argparse
+import sys,string,socket,time,argparse
 
-symbols = 'abcdefghijklmnopqrstuvwxyz'
+# 'abcdefghijklmnopqrstuvwxyz'
+symbols = string.ascii_lowercase
 
 def rot(*symbols):
     def _rot(n):
@@ -14,6 +15,14 @@ def encrypt(k,plaintext):
 
 def decrypt(k,cipher):
     return rot(symbols)(26-k)(cipher)
+
+def brute_force(cipher):
+    plaintext = ''
+    for i in range(1,26):
+        plaintext = decrypt(int(i),cipher)
+        if ("the" in plaintext):
+            answer = plaintext.split()[6]
+    return answer
 
 def read(s):
     s.setblocking(0)
@@ -38,21 +47,33 @@ def read(s):
             pass
     return ''.join(data)  
 
+def connect(host,port):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        ip = socket.gethostbyname(host)
+        sock.connect((ip, int(port)))
+        return sock
+        
+    except socket.error, msg:
+        print str('Error trying to connect.')
+
 def main():
     try:
         parser = argparse.ArgumentParser()
+
+        # Host and Port arguments required to connect to remote host
         parser.add_argument(
                 '-H', '--host',type=str, help='IP Address', required = True)
         parser.add_argument(
                 '-p', '--port',type=int, help='TCP Port', required = True)
         sp = parser.add_subparsers(dest='subparser_name')
 
-        # create the parser for the "d" command
+        # create the parser for the "decrypt" command
         parser_d = sp.add_parser('d', help = 'd help')
         parser_d.add_argument('decrypt', help='Decrypt', action='store_true')
         parser_d.set_defaults(func=decrypt)
 
-        # create the parser for the "e" command
+        # create the parser for the "encrypt" command
         parser_e = sp.add_parser('e', help = 'e help')
         parser_e.add_argument('encrypt', help='Encrypt', action='store_true')
         parser_e.set_defaults(func=encrypt)
@@ -62,26 +83,25 @@ def main():
         print str(err)
         sys.exit(2)
 
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ip = socket.gethostbyname(args.host)
-        sock.connect((ip, int(args.port)))
-        
-    except socket.error, msg:
-        logging.info('Error trying to connect.')
-        sys.exit()
+    sock = connect(args.host, args.port)
 
+    # Stage 1
+    # read socket data, split on newlines into a list, remove empty lines, and split on ":" character
+    response = [line.strip().split(':') for line in read(sock).split('\n') if line.strip()]
+    match = [c for c in response if "psifer text" in c]
+    cipher = match[0][1].strip()
+    answer = brute_force(cipher)
+    sock.sendall(answer)
     response = read(sock)
-    cipher = response[198:].rstrip()
     print(response)
 
-    plaintext = ''
-    for i in range(1,26):
-        plaintext = decrypt(int(i),cipher)
-        if ("the" in plaintext):
-            print plaintext
-            sock.sendall(plaintext)
-            print read(sock)
+    # Stage 2
+    print read(sock)
+    #response = [line.strip().split(':') for line in read(sock).split('\n') if line.strip()]
+    #match = [c for c in response if "psifer text" in c]
+    #print match
+    #cipher = match[0][1].strip()
+
 
 if __name__ == "__main__":
     main()
