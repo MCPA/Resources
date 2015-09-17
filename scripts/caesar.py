@@ -91,12 +91,10 @@ def main():
     match = [c for c in response if "psifer text" in c]
     cipher = match[0][1].strip()
     answer = brute_force(cipher)
-    sock.sendall(answer)
-    response = read(sock)
-    print(response)
+    sock.sendall(answer + '\n')
+    print read(sock)
 
     # Stage 2
-    print read(sock)
     #response = [line.strip().split(':') for line in read(sock).split('\n') if line.strip()]
     #match = [c for c in response if "psifer text" in c]
     #print match
