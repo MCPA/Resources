@@ -1,61 +1,34 @@
-import sys,string,socket,time,argparse
+import string,argparse
 
-# 'abcdefghijklmnopqrstuvwxyz'
-symbols = string.ascii_lowercase
+def rot(msg,shift):
+    """ helper function for the encrypt and decrypt functions """
 
-def rot(*symbols):
-    def _rot(n):
-        encoded = ''.join(sy[n:] + sy[:n] for sy in symbols)
-        lookup = string.maketrans(''.join(symbols), encoded)
-        return lambda s: s.translate(lookup)
-    return _rot
+    # create a character translation table
+    trans = dict(zip(string.lowercase, string.lowercase[shift:] + string.lowercase[:shift]))
+    trans.update(zip(string.uppercase, string.uppercase[shift:] + string.uppercase[:shift]))
 
-def encrypt(k,plaintext):
-    return rot(symbols)(k)(plaintext)
+    # apply the translation table to the msg string
+    return ''.join(trans.get(ch, ch) for ch in msg)
 
-def decrypt(k,cipher):
-    return rot(symbols)(26-k)(cipher)
+def encipher(k,plaintext):
+    """ return an enciphered string given a key and plaintext """
+    return rot(plaintext,k)
 
-def brute_force(cipher):
+def decipher(k,cipher):
+    """ return an deciphered string given a key and ciphertext """
+    return rot(cipher,26-k)
+
+def brute_force(ciphertext,shift_from,shift_to,wordlist):
+    """ brute force a caesar cipher text given a range of rotation values
+    in integer format and a list of words in string format
+    Return a plaintext string if it contains any words in the wordlist"""
     plaintext = ''
-    for i in range(1,26):
-        plaintext = decrypt(int(i),cipher)
-        if ("the" in plaintext):
-            answer = plaintext.split()[6]
+    answer = ''
+    for i in range(shift_from,shift_to):
+        plaintext = decipher(int(i),ciphertext)
+        if  any(word.lower() in plaintext.lower() for word in wordlist):
+            answer = plaintext
     return answer
-
-def read(s):
-    s.setblocking(0)
-    recv_buf = ''
-    data = []
-    timeout = 1
-              
-    begin=time.time()
-    while 1:
-        if data and time.time()-begin > timeout:
-            break
-        elif time.time()-begin > timeout*2:
-            break
-        try:
-            recv_buf = s.recv(1024)
-            if recv_buf:
-                data.append(recv_buf)
-                begin = time.time()
-            else:
-                time.sleep(0.25)
-        except:
-            pass
-    return ''.join(data)  
-
-def connect(host,port):
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ip = socket.gethostbyname(host)
-        sock.connect((ip, int(port)))
-        return sock
-        
-    except socket.error, msg:
-        print str('Error trying to connect.')
 
 def main():
     try:
@@ -63,43 +36,28 @@ def main():
 
         # Host and Port arguments required to connect to remote host
         parser.add_argument(
-                '-H', '--host',type=str, help='IP Address', required = True)
+                '-m', '--message',type=str, help='Ciphertext/Plaintext message', required = True)
         parser.add_argument(
-                '-p', '--port',type=int, help='TCP Port', required = True)
-        sp = parser.add_subparsers(dest='subparser_name')
+                '-s', '--shift',type=int, help='Numerical value to shift', required = False)
+        parser.add_argument(
+                '-f', '--force',help='Brute Force', action="store_true", required = False)
 
-        # create the parser for the "decrypt" command
-        parser_d = sp.add_parser('d', help = 'd help')
-        parser_d.add_argument('decrypt', help='Decrypt', action='store_true')
-        parser_d.set_defaults(func=decrypt)
-
-        # create the parser for the "encrypt" command
-        parser_e = sp.add_parser('e', help = 'e help')
-        parser_e.add_argument('encrypt', help='Encrypt', action='store_true')
-        parser_e.set_defaults(func=encrypt)
+        mode = parser.add_mutually_exclusive_group()
+        mode.add_argument("-d", "--decipher", action="store_true")
+        mode.add_argument("-e", "--encipher", action="store_true")
 
         args = parser.parse_args()
+
+        if(args.force):
+            print brute_force(args.message,1,26,["hello","an","the"])
+        elif(args.encipher):
+            print decipher(args.shift,args.message)
+        elif(args.decipher):
+            print decipher(args.shift,args.message)
+
     except argparse.ArgumentError as err:
         print str(err)
         sys.exit(2)
-
-    sock = connect(args.host, args.port)
-
-    # Stage 1
-    # read socket data, split on newlines into a list, remove empty lines, and split on ":" character
-    response = [line.strip().split(':') for line in read(sock).split('\n') if line.strip()]
-    match = [c for c in response if "psifer text" in c]
-    cipher = match[0][1].strip()
-    answer = brute_force(cipher)
-    sock.sendall(answer + '\n')
-    print read(sock)
-
-    # Stage 2
-    #response = [line.strip().split(':') for line in read(sock).split('\n') if line.strip()]
-    #match = [c for c in response if "psifer text" in c]
-    #print match
-    #cipher = match[0][1].strip()
-
 
 if __name__ == "__main__":
     main()
