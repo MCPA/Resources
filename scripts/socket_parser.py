@@ -1,5 +1,5 @@
 import sys,socket,time,argparse
-import caesar
+import caesar,transposition
 
 def read(s):
     s.setblocking(0)
@@ -53,19 +53,31 @@ def main():
 
     # Stage 1
     # read socket data, split on newlines into a list, remove empty lines, and split on ":" character
-    response = [line.strip().split(':') for line in read(sock).split('\n') if line.strip()]
+    data = read(sock)
+#    print data
+    response = [line.strip().split(':') for line in data.split('\n') if line.strip()]
     match = [c for c in response if "psifer text" in c]
     cipher = match[0][1].strip()
-    print cipher
+    print("Stage 1::Cipher: %s" % cipher)
     answer = caesar.brute_force(cipher,1,26,["the"]).split(' ')
-    print answer
+    print("Stage 1::Plaintext: %s" % answer)
     sock.sendall(answer[6] + '\n')
 
     # Stage 2
-    response = [line.strip().split(':') for line in read(sock).split('\n') if line.strip()]
+    data = read(sock)
+    response = [line.strip().split(':') for line in data.split('\n') if line.strip()]
     match = [c for c in response if "psifer text" in c]
-    print match[0][1]
-    #cipher = match[0][1].strip()
+    cipher = match[0][1].strip()
+    print("Stage 2::Cipher: %s" % cipher)
+    plaintext = transposition.decipher(cipher)
+    print("Stage 2::Plaintext: %s" % plaintext)
+    answer = plaintext.split('"')[1::2][0]
+    sock.sendall(answer + '\n')
+
+    #Stage 3
+    data = read(sock)
+    print data
+
 
 
 if __name__ == "__main__":
