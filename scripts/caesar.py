@@ -49,9 +49,9 @@ def main():
         args = parser.parse_args()
 
         if(args.force):
-            print brute_force(args.message,1,26,["hello","an","the"])
+            print brute_force(args.message,1,26,["a","an","the","I","you","we","he","she"])
         elif(args.encipher):
-            print decipher(args.shift,args.message)
+            print encipher(args.shift,args.message)
         elif(args.decipher):
             print decipher(args.shift,args.message)
 
