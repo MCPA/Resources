@@ -1,5 +1,19 @@
 import sys,socket,time,argparse
+# ./caesar.py ./transposition.py
 import caesar,transposition
+#./pygenere.py
+from pygenere import *
+class color:
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
 
 def read(s):
     s.setblocking(0)
@@ -35,6 +49,8 @@ def connect(host,port):
         print str('Error trying to connect.')
 
 def main():
+    verbose = []
+
     try:
         parser = argparse.ArgumentParser()
 
@@ -43,6 +59,9 @@ def main():
                 '-H', '--host',type=str, help='IP Address', required = True)
         parser.add_argument(
                 '-p', '--port',type=int, help='TCP Port', required = True)
+        parser.add_argument(
+                '-v', '--verbose',help='Enable verbose mode', 
+                action="store_true", required = False)
 
         args = parser.parse_args()
     except argparse.ArgumentError as err:
@@ -52,31 +71,52 @@ def main():
     sock = connect(args.host, args.port)
 
     # Stage 1
-    # read socket data, split on newlines into a list, remove empty lines, and split on ":" character
     data = read(sock)
-#    print data
-    response = [line.strip().split(':') for line in data.split('\n') if line.strip()]
-    match = [c for c in response if "psifer text" in c]
-    cipher = match[0][1].strip()
-    print("Stage 1::Cipher: %s" % cipher)
-    answer = caesar.brute_force(cipher,1,26,["the"]).split(' ')
-    print("Stage 1::Plaintext: %s" % answer)
-    sock.sendall(answer[6] + '\n')
+    verbose.append(data)
+    if args.verbose:
+        print verbose[0]
+    cipher = data.split(':')[1].strip()
+    plaintext = caesar.brute_force(cipher,1,26,["the"])
+    answer = plaintext.split(' ')[6]
+    print("{0}::Stage 1 Cipher: {1}{2}".format(color.RED, color.END,cipher))
+    print("{0}::Stage 2 Plaintext: {1}{2}".format(color.RED,color.END, plaintext))
+    print("{0}::Stage 2 Answer: {1}{2}".format(color.GREEN,color.END,answer))
+    sock.sendall(answer + '\n')
 
     # Stage 2
     data = read(sock)
-    response = [line.strip().split(':') for line in data.split('\n') if line.strip()]
-    match = [c for c in response if "psifer text" in c]
-    cipher = match[0][1].strip()
-    print("Stage 2::Cipher: %s" % cipher)
+    verbose.append(data)
+    if args.verbose:
+        print("\n %s" % verbose[1])
+    cipher = data.split(':')[1].strip()
     plaintext = transposition.decipher(cipher)
-    print("Stage 2::Plaintext: %s" % plaintext)
     answer = plaintext.split('"')[1::2][0]
+    print("{0}::Stage 2 Cipher: {1}{2}".format(color.RED, color.END,cipher))
+    print("{0}::Stage 2 Plaintext: {1}{2}".format(color.RED,color.END, plaintext))
+    print("{0}::Stage 2 Answer: {1}{2}".format(color.GREEN,color.END,answer))
     sock.sendall(answer + '\n')
 
     #Stage 3
     data = read(sock)
-    print data
+    #print "Data received: %s" % data
+    if( (data != "") and ("study" not in data)): 
+        cipher = data.split(':')[1]
+        key = VigCrack(cipher).crack_codeword()
+        #print "Key: %s" % key
+        plaintext = Vigenere(cipher).decipher(key)
+        plaintext =  plaintext.replace(" ","")
+        #print "Plaintext: %s" % plaintext
+        if plaintext.find("HERE"):
+            answer = plaintext.split("HERE")[1].split("OK")[0]
+            print("{0}::Stage 3 Cipher: {1}{2}".format(color.RED, color.END,cipher))
+            print("{0}::Stage 3 Plaintext: {1}{2}".format(color.RED,color.END, plaintext))
+            print("{0}::Stage 3 Answer: {1}{2}".format(color.GREEN,color.END,answer))
+            sock.sendall(answer)
+            print read(sock)
+        else:
+            print("{0}Plaintext was not properly decrypted.{1}".format(color.RED,color.END))
+    else:
+        print("{0}No data received for Stage 3.{1}".format(color.RED,color.END))
 
 
 

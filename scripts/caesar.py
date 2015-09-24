@@ -10,13 +10,13 @@ def rot(msg,shift):
     # apply the translation table to the msg string
     return ''.join(trans.get(ch, ch) for ch in msg)
 
-def encipher(k,plaintext):
+def encipher(plaintext,shift):
     """ return an enciphered string given a key and plaintext """
-    return rot(plaintext,k)
+    return rot(plaintext,shift)
 
-def decipher(k,cipher):
+def decipher(cipher,shift):
     """ return an deciphered string given a key and ciphertext """
-    return rot(cipher,26-k)
+    return rot(cipher,-shift)
 
 def brute_force(ciphertext,shift_from,shift_to,wordlist):
     """ brute force a caesar cipher text given a range of rotation values
@@ -25,7 +25,7 @@ def brute_force(ciphertext,shift_from,shift_to,wordlist):
     plaintext = ''
     answer = ''
     for i in range(shift_from,shift_to):
-        plaintext = decipher(int(i),ciphertext)
+        plaintext = decipher(ciphertext,int(i))
         if  any(word.lower() in plaintext.lower() for word in wordlist):
             answer = plaintext
     return answer
@@ -49,11 +49,11 @@ def main():
         args = parser.parse_args()
 
         if(args.force):
-            print brute_force(args.message,1,26,["a","an","the","I","you","we","he","she"])
+            print brute_force(args.message,1,26,["the","you","we","he","she"])
         elif(args.encipher):
-            print encipher(args.shift,args.message)
+            print encipher(args.message,args.shift)
         elif(args.decipher):
-            print decipher(args.shift,args.message)
+            print decipher(args.message,args.shift)
 
     except argparse.ArgumentError as err:
         print str(err)
