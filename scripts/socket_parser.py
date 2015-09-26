@@ -29,12 +29,12 @@ def read(s,isBlocking=0):
         elif time.time()-begin > timeout*2:
             break
         try:
-            recv_buf = s.recv(2048)
+            recv_buf = s.recv(1024)
             if recv_buf:
                 data.append(recv_buf)
                 begin = time.time()
             else:
-                time.sleep(0.05)
+                time.sleep(0.025)
         except:
             pass
     return ''.join(data)  
@@ -136,7 +136,7 @@ def main():
                 print("{0}::Stage 3 Key: {1}{2}".format(color.RED, color.END,key))
                 print("{0}::Stage 3 Plaintext: {1}{2}".format(color.RED,color.END, plaintext))
                 print("{0}::Stage 3 Answer: {1}{2}".format(color.GREEN,color.END,answer))
-                sock.send(answer)
+                sock.send(answer + "\n")
                 data = read(sock)
                 print data
             except IndexError,e:
